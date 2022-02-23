@@ -7,7 +7,6 @@ import 'package:flutter/services.dart';
 import 'package:intl/intl.dart';
 import 'package:rflutter_alert/rflutter_alert.dart';
 import 'package:toast/toast.dart';
-import 'package:cryptoplaymate1dm/Modelo/cajas_modelo.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
@@ -15,8 +14,8 @@ import 'package:flutter_speed_dial/flutter_speed_dial.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:location_permissions/location_permissions.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:cryptoplaymate1dm/authentication.dart';
 import 'package:url_launcher/url_launcher.dart';
+import 'package:w1dm/authentication.dart';
 
 class home extends StatefulWidget {
 
@@ -62,23 +61,6 @@ class homeState extends State<home> {
 
   final String imageUrl = "https://www.elcarrocolombiano.com/wp-content/uploads/2019/01/20190122-MPM-ERELIS-AUTO-DEPORTIVO-MAS-BARATO-01.jpg";
 
-  Widget hola (){
-
-    ui.platformViewRegistry.registerViewFactory(
-      imageUrl,
-          (int viewId) => ImageElement()..src = imageUrl,
-    );
-    return Container(
-      height: 350,
-      width: 500,
-      decoration: const BoxDecoration(
-        borderRadius: BorderRadius.all(Radius.circular(12)),
-      ),
-      child: HtmlElementView(
-        viewType: imageUrl,
-      ),
-    );
-  }
 
   Future<void> inicioSesion() async {
     // marked async

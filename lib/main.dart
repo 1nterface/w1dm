@@ -1,18 +1,4 @@
 //@dart=2.9
-import 'package:cryptoplaymate1dm/Clientes/cryptactoe.dart';
-import 'package:cryptoplaymate1dm/Clientes/cryptactoe_game.dart';
-import 'package:cryptoplaymate1dm/Clientes/cryptactoe_instructions.dart';
-import 'package:cryptoplaymate1dm/Clientes/cryptactoe_lobby.dart';
-import 'package:cryptoplaymate1dm/Clientes/cryptactoe_settings.dart';
-import 'package:cryptoplaymate1dm/Clientes/home.dart';
-import 'package:cryptoplaymate1dm/Clientes/juegos_principal.dart';
-import 'package:cryptoplaymate1dm/Clientes/nft_members.dart';
-import 'package:cryptoplaymate1dm/Clientes/nft_power_cards.dart';
-import 'package:cryptoplaymate1dm/Clientes/roadmap.dart';
-import 'package:cryptoplaymate1dm/Clientes/whitepaper.dart';
-import 'package:cryptoplaymate1dm/Modelo/agentes_modelo.dart';
-import 'package:cryptoplaymate1dm/olvidecontra.dart';
-import 'package:cryptoplaymate1dm/team.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:location_permissions/location_permissions.dart';
@@ -20,6 +6,7 @@ import 'package:url_strategy/url_strategy.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/material.dart';
 import 'package:location_permissions/location_permissions.dart';
+import 'package:w1dm/home.dart';
 void main() async{
   WidgetsFlutterBinding.ensureInitialized();
 
