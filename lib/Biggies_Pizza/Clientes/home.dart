@@ -201,7 +201,7 @@ class homeState extends State<home> with SingleTickerProviderStateMixin {
         controller: controller,
         children: <Widget>[
           //proveedor.Menu_Clientes2(),
-          menu.menu_cliente("nombreProducto", "nombreProveedor", "newid", "foto", "estado", "cdb", "maximo", "minimo"),
+          menu.menu_cliente("nombreProducto", "nombreProveedor", "newid", "foto", "estado", "cdb", 0, 0),
           ofertas.ofertas(),
           compras.compras(),
           //acreedores.Mis_Compras2(),
