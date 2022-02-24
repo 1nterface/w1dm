@@ -15,7 +15,10 @@ import 'package:geolocator/geolocator.dart';
 import 'package:location_permissions/location_permissions.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:url_launcher/url_launcher.dart';
-import 'package:w1dm/authentication.dart';//
+import 'package:w1dm/authentication.dart';
+
+import 'Biggies_Pizza/Clientes/home.dart';
+import 'Biggies_Pizza/Modelo/cajas_modelo.dart';//
 
 class inicio extends StatefulWidget {
 
@@ -487,27 +490,8 @@ class inicioState extends State<inicio> {
                         InkWell(
                           onTap: () async {
 
-                            bool sesion = false;
+                            home(cajas_modelo("","","",0,0, 0, 0, 0, "", "", "", "", "", 0));
 
-                            final FirebaseAuth auth = FirebaseAuth.instance;
-                            if(FirebaseAuth.instance.currentUser?.email == null){
-                              // not logged
-                              setState(() {
-                                sinSesion2();
-
-                                sesion = false;
-                                print("Sin pestania $sesion");
-                              });
-
-                            } else {
-                              // logged
-                              setState(() {
-                                Navigator.of(context).pushNamed("/cryptactoe");
-
-                                sesion = true;
-                                print("Con pestania $sesion");
-                              });
-                            }
 
                             //sinSesion2();
                             //Navigator.of(context).pushNamed("/cryptactoe");
@@ -577,7 +561,7 @@ class inicioState extends State<inicio> {
                         ),
                         InkWell(
                           onTap: () async {
-                            Navigator.of(context).pushNamed("/menu_cliente");
+                            home(cajas_modelo("","","",0,0, 0, 0, 0, "", "", "", "", "", 0));
 
 
                             //sinSesion2();
