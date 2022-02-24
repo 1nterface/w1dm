@@ -86,7 +86,6 @@ class gerencia_homeState extends State<gerencia_home> with SingleTickerProviderS
 
   }
 
-
   void t(){
     Future.delayed(Duration(seconds: 5), () {
       print(" This line is execute after 5 seconds");

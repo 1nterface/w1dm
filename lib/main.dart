@@ -10,6 +10,7 @@ import 'package:w1dm/Biggies_Pizza/olvidecontra.dart';
 import 'package:w1dm/inicio.dart';
 
 import 'Biggies_Pizza/Clientes/clientes_login.dart';
+import 'Biggies_Pizza/Clientes/home.dart';
 import 'Biggies_Pizza/Clientes/lista_restaurantes.dart';
 import 'Biggies_Pizza/Clientes/menu_cliente.dart';
 import 'Biggies_Pizza/Clientes/registro.dart';
@@ -117,7 +118,7 @@ class MyApp extends StatelessWidget {
       ),
       home:
       //Inicio(),
-      inicio(),
+      home(cajas_modelo("","","",0,0, 0, 0, 0, "", "", "", "", "", 0)),
       // <--- App Clientes
 
 
