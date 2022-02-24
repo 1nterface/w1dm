@@ -17,17 +17,17 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:w1dm/authentication.dart';//
 
-class home extends StatefulWidget {
+class inicio extends StatefulWidget {
 
   var data;
-  home({this.data});
+  inicio({this.data});
   @override
-  homeState createState() => homeState();
+  inicioState createState() => inicioState();
 }
 
-class homeState extends State<home> {
+class inicioState extends State<inicio> {
 
-  homeState();
+  inicioState();
 
   @override
   void initState() {
@@ -593,7 +593,7 @@ class homeState extends State<home> {
                             } else {
                               // logged
                               setState(() {
-                                Navigator.of(context).pushNamed("/cryptactoe");
+                                Navigator.of(context).pushNamed("/menu_cliente");
 
                                 sesion = true;
                                 print("Con pestania $sesion");
