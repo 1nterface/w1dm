@@ -170,7 +170,7 @@ class homeState extends State<home> with SingleTickerProviderStateMixin {
       appBar: AppBar(
         centerTitle: true,
         backgroundColor: Colors.red[800],
-        title: Text(widget.product.nombreProducto, style: const TextStyle(color: Colors.white),),
+        title: Text("Gil", style: const TextStyle(color: Colors.white),),
         bottom: TabBar(
           controller: controller,
           tabs: <Widget>[
@@ -182,7 +182,7 @@ class homeState extends State<home> with SingleTickerProviderStateMixin {
             ),
             //Tab(icon: Icon(Icons.chat), text: "CHAT",),
             promosNotificaciones(context),
-            comprasNotificaciones(context),
+            //comprasNotificaciones(context),
           ],
         ),
       ),
