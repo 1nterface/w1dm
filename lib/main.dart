@@ -11,6 +11,7 @@ import 'package:w1dm/inicio.dart';
 
 import 'Biggies_Pizza/Clientes/clientes_login.dart';
 import 'Biggies_Pizza/Clientes/lista_restaurantes.dart';
+import 'Biggies_Pizza/Clientes/menu_cliente.dart';
 import 'Biggies_Pizza/Clientes/registro.dart';
 import 'Biggies_Pizza/Direccion/alta_costos_caja.dart';
 import 'Biggies_Pizza/Direccion/alta_portada.dart';
@@ -92,6 +93,7 @@ class MyApp extends StatelessWidget {
 
 
         '/clientes_login': (BuildContext context) => clientes_login(),
+        '/menu_cliente': (BuildContext context) => menu_cliente("","","","","","",0,0),
         '/direccion_registro_nuevo': (BuildContext context) => direccion_registro_nuevo(),
         '/registro': (BuildContext context) => registro(),
         '/home': (BuildContext context) => inicio(),
