@@ -257,7 +257,7 @@ class homeState extends State<home> {
           backgroundColor: Color(0xFF293143),
           centerTitle: true,
           title: SingleChildScrollView(
-            scrollDirection: Axis.horizontal,
+            scrollDirection: Axis.vertical,
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children:[
