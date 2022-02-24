@@ -257,7 +257,7 @@ class homeState extends State<home> {
           backgroundColor: Color(0xFF293143),
           centerTitle: true,
           title: SingleChildScrollView(
-            scrollDirection: Axis.vertical,
+            scrollDirection: Axis.horizontal,
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children:[
@@ -629,7 +629,7 @@ class homeState extends State<home> {
                         autoPlayCurve: Curves.easeInOut,
                         reverse: true,
                         enlargeCenterPage: true,
-                        scrollDirection: Axis.horizontal,
+                        scrollDirection: Axis.vertical,
                       ),
                     ),
                   ],
