@@ -2,17 +2,20 @@ import 'dart:math';
 import 'package:badges/badges.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:location_permissions/location_permissions.dart';
-import 'package:w1dm/Biggies_Pizza/Modelo/cajas_modelo2.dart';
-import 'package:w1dm/Biggies_Pizza/Clientes/comprar_ahora.dart';
-import 'package:w1dm/Biggies_Pizza/Direccion/carpinteria_producto_detalle.dart';
+import 'package:siento11/Clientes/comprar_ahora.dart';
+import 'package:siento11/Direccion/carpinteria_producto_detalle.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_speed_dial/flutter_speed_dial.dart';
 import 'package:flutter_spinkit/flutter_spinkit.dart';
 import 'package:intl/intl.dart';
-import 'package:w1dm/Biggies_Pizza/Modelo/nota_modelo.dart';
+import 'package:siento11/Direccion/producto_detalle2.dart';
+import 'package:siento11/Direccion/producto_detalle_zoom.dart';
+import 'package:siento11/Modelo/cajas_modelo.dart';
+import 'package:siento11/Modelo/nota_modelo.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:siento11/authentication.dart';
 import 'package:toast/toast.dart';
 import 'package:rflutter_alert/rflutter_alert.dart';
 
@@ -35,6 +38,27 @@ class menu_clienteState extends State<menu_cliente> {
   CollectionReference reflistaextras = FirebaseFirestore.instance.collection('Extras');
   String? category, categorytalla, categorytacon;
   String? category2, category3;
+
+  bool sesion = false;
+
+  void correo () async {
+
+    final FirebaseAuth auth = FirebaseAuth.instance;
+    if(FirebaseAuth.instance.currentUser?.email == null){
+// not logged
+      setState(() {
+        sesion = false;
+        print("Sin pestania $sesion");
+      });
+
+    } else {
+// logged
+      setState(() {
+        sesion = true;
+        print("Con pestania $sesion");
+      });
+    }
+  }
 
   Future<void> promoNotificacion (BuildContext)async{
     QuerySnapshot _myDoc = await FirebaseFirestore.instance.collection('Promociones').where('estado', isEqualTo: "sinver").get();
@@ -95,7 +119,7 @@ class menu_clienteState extends State<menu_cliente> {
                   onPressed: (){
                     _sheetCarrito(context);
                   },
-                  backgroundColor: Colors.red[800],
+                  backgroundColor: Color(0xff6DA08E),
                   child: Icon(Icons.add_shopping_cart, color: Colors.white,),
                 ),
               )
@@ -104,7 +128,7 @@ class menu_clienteState extends State<menu_cliente> {
                 onPressed: (){
                   _sheetCarrito(context);
                 },
-                backgroundColor: Colors.red[800],
+                backgroundColor: Color(0xff6DA08E),
                 child: Icon(Icons.add_shopping_cart, color: Colors.white),
               );
 
@@ -112,8 +136,19 @@ class menu_clienteState extends State<menu_cliente> {
         }
     );
   }
+  Widget notificacionesCarrito2 (BuildContext context){
+    return FloatingActionButton(
+      onPressed: (){
+        _sheetCarrito(context);
+      },
+      backgroundColor: Color(0xff6DA08E),
+      child: Icon(Icons.add_shopping_cart, color: Colors.white),
+    );
+  }
 
-  void _borrarElemento (BuildContext context, String id) async {
+  int existencia = 0;
+
+  void _borrarElemento (BuildContext context, String id, int cantidadaregresar, existencia, String newidproducto) async {
     var category;
     // flutter defined function
     showDialog(
@@ -123,8 +158,6 @@ class menu_clienteState extends State<menu_cliente> {
         return AlertDialog(
           title: const Text('¿Borrar del carrito?', style: TextStyle(color: Colors.black)),
           actions: <Widget>[
-
-
 
             FlatButton(
               onPressed: (){
@@ -139,6 +172,10 @@ class menu_clienteState extends State<menu_cliente> {
             FlatButton(
               child: Text("Si"),
               onPressed: () async {
+
+                int totale = existencia + cantidadaregresar;
+
+                FirebaseFirestore.instance.collection('Cajas').doc(newidproducto).update({'existencia': totale});
 
                 FirebaseFirestore.instance.collection('Pedidos_Jimena_Interna').doc(id).delete();
 
@@ -281,16 +318,34 @@ class menu_clienteState extends State<menu_cliente> {
                                             mainAxisAlignment: MainAxisAlignment.spaceAround,
                                             children: <Widget>[
                                               InkWell(
-                                                  child: Icon(Icons.delete, color: Colors.red[800]),
                                                 onTap: () async {
+
                                                   SharedPreferences preferences = await SharedPreferences.getInstance();
                                                   await preferences.remove('totalProducto');
 
                                                   Navigator.of(context).pop();
 
                                                   final String newid2 = documents["newid"];
-                                                  _borrarElemento(context, newid2);
+
+
+                                                  print("ÄQUI PONER EXISTENCIA ACTUAL");
+
+                                                  FirebaseFirestore.instance.collection('Cajas').where("nombreProducto", isEqualTo: documents["nombreProducto"]).snapshots().listen((data) async {
+                                                    data.docs.forEach((doc) async {
+
+                                                      int clave = doc['existencia'];
+
+                                                      print("Existencia real "+clave.toString()+" Y cantidad a agregar "+documents["cantidad"].toString());
+
+                                                      setState(() {
+                                                        existencia = clave;
+                                                      });
+                                                    }); //METODO THANOS FOR EACH
+                                                  });
+                                                  _borrarElemento(context, newid2, documents["cantidad"], existencia, documents["newidproducto"]);
+
                                                 },
+                                                child: Icon(Icons.delete, color: Color(0xff6DA08E),),
                                               ),
                                               Text(documents["cantidad"].toString()),
                                               Column(
@@ -304,6 +359,7 @@ class menu_clienteState extends State<menu_cliente> {
                                               ),
                                               Text("\$"+documents["totalProducto"].toString()),
                                               //Text(telefonoProveedor),
+
                                             ],
                                           ),
                                         ],
@@ -321,12 +377,12 @@ class menu_clienteState extends State<menu_cliente> {
                 Text('SUBTOTAL', style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),),
                 Text(totalreal.toString(), style: TextStyle(fontSize: 25),),
                 totalreal == 0.0?
-                    Container()
-                :
+                Container()
+                    :
                 Container(
                   child: SizedBox(
                     child: RaisedButton(
-                      color: Colors.red[800],
+                      color: Color(0xff6DA08E),
                       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(30.0)),
                       child: Text('Pagar', style: TextStyle(color: Colors.white),),
                       onPressed: () async {
@@ -339,7 +395,7 @@ class menu_clienteState extends State<menu_cliente> {
                         final sucursal = prefs4.getString('sucursal') ?? "";
                         final servicio = prefs4.getString('servicio') ?? "";
 
-                        await Navigator.push(context, MaterialPageRoute(builder: (context) => comprar_ahora(nota_modelo("", "", folio,0,"newid",widget.empresa, totalreal, "sucursal",0,0,servicio, widget.correoEmpresa,""))),);
+                        await Navigator.push(context, MaterialPageRoute(builder: (context) => comprar_ahora(nota_modelo("", "", folio,0,"newid","Siento11 Colectivo", totalreal, "sucursal",0,0,servicio, "ventas.siento11@gmail.com",""))),);
 
                         print("Dr. House "+widget.empresa);
                       },
@@ -358,16 +414,38 @@ class menu_clienteState extends State<menu_cliente> {
     await preferences.remove('totalProducto');
     await preferences.remove('sucursal');
   }
+  bool sesion2 = false;
+
+  void correoPestana () async {
+
+    final FirebaseAuth auth = FirebaseAuth.instance;
+    if(FirebaseAuth.instance.currentUser?.email == null){
+// not logged
+      setState(() {
+        sesion2 = false;
+        print("Sin pestania $sesion");
+      });
+
+    } else {
+// logged
+      setState(() {
+        sesion2 = true;
+        print("Con pestania $sesion");
+      });
+    }
+  }
+
 
   @override
   void initState() {
+    correoPestana();
     print(widget.empresa);
     borrar(context);
     // TODO: implement initState
     //promoNotificacion(context);
-    comprasNotificacion(context);
     //comprasNotificacion(context);
-    notificacionesCarrito(context);
+    //comprasNotificacion(context);
+    //notificacionesCarrito(context);
     super.initState();
   }
 
@@ -392,7 +470,199 @@ class menu_clienteState extends State<menu_cliente> {
 
   int _itemCount = 1;
 
-  Widget _buildAboutDialog(BuildContext context, String foto, String nombreProducto, double costo, String descripcion, String empresa, String categoriap, String newid, String codigo) {
+  void _exitencia (BuildContext context) async {
+    var category;
+    // flutter defined function
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        // return object of type Dialog
+        return AlertDialog(
+          title: const Text('La cantidad es mayor al inventario', style: TextStyle(color: Colors.black)),
+          actions: <Widget>[
+            FlatButton(
+              onPressed: (){
+
+                Navigator.of(context).pop(); //Te regresa a la pantalla anterior
+
+              },
+              child: const Text('Ok'),
+            ),
+            // usually buttons at the bottom of the dialog
+            // ignore: deprecated_member_use
+          ],
+        );
+      },
+    );
+  }
+
+  TextEditingController _emailController = TextEditingController();
+  TextEditingController _passwordController = TextEditingController();
+  Future<void> inicioSesion() async {
+    // marked async
+    AuthenticationHelper()
+        .signIn(email: _emailController.text, password: _passwordController.text)
+        .then((result) {
+      if (result == null) {
+
+        Navigator.of(context).pop();
+
+        //Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) => home(cajas_modelo("","","",0,0,0,0,0,"","","","","",0))));
+        Toast.show("¡Has iniciado sesion!", context, duration: Toast.LENGTH_LONG, gravity:  Toast.CENTER);
+
+      } else {
+        Toast.show("Contraseña incorrecta!", context, duration: Toast.LENGTH_LONG, gravity:  Toast.CENTER);
+      }
+    });
+  }
+
+  Widget comprasNotificaciones (BuildContext context){
+
+    final FirebaseAuth auth = FirebaseAuth.instance;
+    final User? user = auth.currentUser;
+    final correoPersonal = user!.email;
+
+    return StreamBuilder<DocumentSnapshot<Object?>>(
+        stream: FirebaseFirestore.instance.collection('Notificaciones').doc("Compras"+correoPersonal.toString()).snapshots(),
+        builder: (context, snapshot) {
+          if (!snapshot.hasData) {
+            return Text("Loading");
+          }
+          //reference.where("title", isEqualTo: 'UID').snapshots(),
+
+          else
+          {
+            Map<String, dynamic> data = snapshot.data!.data() as Map<String, dynamic>;
+
+
+            return
+              data["notificacion"] == "0"?
+              Column(
+                children: const [
+                  Tab(icon: Icon(Icons.monetization_on, color: Colors.white,)),
+                  Text("COMPRAS", style: TextStyle(color: Colors.white),),
+                ],
+              )
+                  :
+              Badge(
+                position: BadgePosition(left: 40),
+                badgeColor: Colors.white,
+                badgeContent: Text(data["notificacion"], style: const TextStyle(fontWeight: FontWeight.bold, color: Colors.red), ),
+                child: ClipRRect(
+                  borderRadius: BorderRadius.circular(10.0),
+                  child: Column(
+                    children: [
+                      Tab(icon: Icon(Icons.monetization_on, color: Colors.white,)),
+                      Text("COMPRAS", style: TextStyle(color: Colors.white),),
+                    ],
+                  ),
+
+                ),
+              );
+
+          }
+        }
+    );
+  }
+
+  Widget comprasNotificaciones2 (BuildContext context){
+
+    return Column(
+      children: const [
+        Tab(icon: Icon(Icons.monetization_on, color: Colors.white,)),
+        Text("COMPRAS", style: TextStyle(color: Colors.white),),
+      ],
+    );
+  }
+
+  void agregarACarrito(BuildContext context, String foto, String nombreProducto, double costo, String descripcion, String empresa, String categoriap, String newid, String codigo, int existencia) async {
+    int totale = 0;
+
+    //VA  ASER ESTE, HACERLO AL DESPERTAR, SUBIRLO RAPIDO Y COBRAR AL ALAN.
+    totale = existencia - _itemCount;
+
+    totale < 0?
+    _exitencia(context)
+        :
+    FirebaseFirestore.instance.collection('Cajas').doc(newid).update({
+      'existencia': totale,
+    });
+
+    setState(() {
+      comprasNotificaciones(context);
+      comprasNotificaciones2(context);
+      notificacionesCarrito2(context);
+      notificacionesCarrito(context);
+    });
+
+    QuerySnapshot _myDoc = await FirebaseFirestore.instance.collection('Pedidos_Jimena').orderBy('folio').get();
+    List<DocumentSnapshot> _myDocCount = _myDoc.docs;
+
+    final collRef = FirebaseFirestore.instance.collection('Pedidos_Jimena_Interna');
+    DocumentReference docReference = collRef.doc();
+
+    var now = new DateTime.now();
+
+    //double precio = double.parse(_precio.text);
+
+    double resultado = _itemCount * costo;
+
+    final FirebaseAuth auth = FirebaseAuth.instance;
+    final User? user2 = auth.currentUser;
+    final correoPersonal = user2!.email;
+
+    totale < 0?
+    _exitencia(context)
+        :
+    docReference.set({
+      'costo': costo,
+      'codigo': codigo,
+      //'tipo': tipo,
+      'correocliente': correoPersonal,
+      'descripcion': descripcion,
+      'totalProducto': resultado,
+      'cantidad': _itemCount,
+      'folio': _myDocCount.length+1,
+      'newid': docReference.id,
+      //'precioVenta': precio,
+      'foto': foto,
+      'id': "987",
+      'nombreProducto': nombreProducto,
+      'foto': foto,
+      'miembrodesde': DateFormat("dd-MM-yyyy").format(now),
+      'newidproducto': newid,
+    });
+    //countDocuments();
+    //Navigator.of(context).pop();
+    _cantidadDeProducto.clear();
+    totale < 0?
+    print("No hay tanto inventario")
+        :
+    Toast.show("¡Agregado exitosamente!", context, duration: Toast.LENGTH_SHORT, gravity:  Toast.CENTER);
+
+    Navigator.of(context).pop();
+
+    //BLOQUE DE CODIGO PARA NOTIFICACION PARA COMPRAS EN CARRITO
+    QuerySnapshot _myDocE = await FirebaseFirestore.instance.collection('Pedidos_Jimena_Interna').where('correocliente', isEqualTo: correoPersonal).where('folio', isEqualTo: _myDocCount.length+1).get();
+    List<DocumentSnapshot> _myDocCountE = _myDocE.docs;
+    //print('Weed: '+ _myDocCountE.length.toString() +1.toString());
+    var total = _myDocCountE.length;
+
+    FirebaseFirestore.instance.collection('Notificaciones').doc("Carrito"+correoPersonal.toString()).update({
+      'notificacion': total.toString(),
+      'correo': correoPersonal,
+    });
+
+    //AQUI VA UPDATE DE LA EXISTENCIA Y LA LOGICA
+
+    SharedPreferences preferences = await SharedPreferences.getInstance();
+    await preferences.remove('totalProducto');
+
+    _itemCount = 1;
+
+  }
+
+  Widget _buildAboutDialog(BuildContext context, String foto, String nombreProducto, double costo, String descripcion, String empresa, String categoriap, String newid, String codigo, int existencia) {
     return StatefulBuilder(
       builder: (BuildContext context, setState) =>  ListView(
         children: <Widget>[
@@ -410,24 +680,13 @@ class menu_clienteState extends State<menu_cliente> {
                     InkWell(
                       onTap: () async {
 
-                        //await Navigator.push(context, MaterialPageRoute(builder: (context) => Producto_Detalle2(Cajas_Modelo(null, nombreProducto,"fecha",0,2,3,4,5,descripcion, empresa,foto,"f", newid, costo))),);
+                        await Navigator.push(context, MaterialPageRoute(builder: (context) => producto_detalle_zoom(cajas_modelo("", nombreProducto,"fecha",0,2,3,4,5,descripcion, empresa,foto,"f", newid, costo))),);
 
                         print("Precio: "+costo.toString());
                       },
                       child: ClipRRect(
-                        borderRadius: BorderRadius.circular(10.0),
-                        child: Container(
-                          width: 230.0,
-                          height: 230.0,
-                          decoration: BoxDecoration(
-                            image: DecorationImage(
-                                fit: BoxFit.cover,
-                                image: NetworkImage(foto)
-                            ),
-                            //borderRadius: BorderRadius.all(Radius.circular(30.0)),
-                            color: Colors.transparent,
-                          ),
-                        ),
+                          borderRadius: BorderRadius.circular(10.0),
+                          child: Image.network(foto)
                       ),
                     ),
                   ],
@@ -450,6 +709,18 @@ class menu_clienteState extends State<menu_cliente> {
                         ),
                       ],
                     ),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.start,
+                      children: [
+                        Text(descripcion,style: TextStyle(fontSize: 20, fontStyle: FontStyle.italic),),
+                      ],
+                    ),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.start,
+                      children: <Widget>[
+                        Text("Existencia "+existencia.toString()),
+                      ],
+                    ),
                     SizedBox(height:10),
                     Row(
                       mainAxisAlignment: MainAxisAlignment.start,
@@ -460,7 +731,7 @@ class menu_clienteState extends State<menu_cliente> {
                     SizedBox(height:5),
 
                     Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      mainAxisAlignment: MainAxisAlignment.center,
                       children: <Widget>[
                         //spinnerMedida(newid),
                         Row(
@@ -484,7 +755,7 @@ class menu_clienteState extends State<menu_cliente> {
                                   ),
                                   decoration: BoxDecoration(
                                       shape: BoxShape.circle,
-                                      color: Colors.red[800]),
+                                      color: Color(0xff6DA08E)),
                                 ),
                               ),
                               SizedBox(width:10),
@@ -508,7 +779,7 @@ class menu_clienteState extends State<menu_cliente> {
                                   ),
                                   decoration: BoxDecoration(
                                       shape: BoxShape.circle,
-                                      color: Colors.red[800]),
+                                      color: Color(0xff6DA08E)),
                                 ),
                               ),                            ]
                         )
@@ -522,13 +793,6 @@ class menu_clienteState extends State<menu_cliente> {
                 //AL MOMENTO DE COBRAR
                 //medidaNumero(context, newid),
                 SizedBox(height: 20.0,),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.start,
-                  children: [
-                    Text(descripcion),
-                  ],
-                ),
-                SizedBox(height: 20.0,),
 
                 Row(
                   mainAxisAlignment: MainAxisAlignment.center,
@@ -538,69 +802,80 @@ class menu_clienteState extends State<menu_cliente> {
                         Container(
                           child: SizedBox(
                             child: RaisedButton(
-                              color: Colors.red[800],
+                              color: Color(0xff6DA08E),
                               shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(30.0)),
                               child: Text('Agregar a carrito', style: TextStyle(color: Colors.white),),
                               onPressed: () async {
 
-                                setState(() {
-                                  _itemCount = 1;
-                                  notificacionesCarrito(context);
-                                });
-
-                                QuerySnapshot _myDoc = await FirebaseFirestore.instance.collection('Pedidos_Jimena').orderBy('folio').get();
-                                List<DocumentSnapshot> _myDocCount = _myDoc.docs;
-
-                                final collRef = FirebaseFirestore.instance.collection('Pedidos_Jimena_Interna');
-                                DocumentReference docReference = collRef.doc();
-
-                                var now = new DateTime.now();
-
-                                //double precio = double.parse(_precio.text);
-
-                                double resultado = _itemCount * costo;
-
                                 final FirebaseAuth auth = FirebaseAuth.instance;
-                                final User? user2 = auth.currentUser;
-                                final correoPersonal = user2!.email;
 
-                                docReference.set({
-                                  'costo': costo,
-                                  'codigo': codigo,
-                                  //'tipo': tipo,
-                                  'correocliente': correoPersonal,
-                                  'descripcion': descripcion,
-                                  'totalProducto': resultado,
-                                  'cantidad': _itemCount,
-                                  'folio': _myDocCount.length+1,
-                                  'newid': docReference.id,
-                                  //'precioVenta': precio,
-                                  'foto': foto,
-                                  'id': "987",
-                                  'nombreProducto': nombreProducto,
-                                  'foto': foto,
-                                  'miembrodesde': DateFormat("dd-MM-yyyy").format(now),
-                                });
-                                //countDocuments();
-                                //Navigator.of(context).pop();
-                                _cantidadDeProducto.clear();
-                                Toast.show("¡Agregado exitosamente!", context, duration: Toast.LENGTH_SHORT, gravity:  Toast.CENTER);
+                                if(FirebaseAuth.instance.currentUser?.uid == null){
+                                  // not logged
+                                  Alert(
+                                      context: context,
+                                      title: "Inicio de sesion",
+                                      content: Column(
+                                        children: <Widget>[
+                                          TextFormField(
+                                            controller: _emailController,
+                                            decoration: InputDecoration(
+                                              icon: Icon(Icons.account_circle, color: Color(0xff6DA08E)),
+                                              labelText: 'Correo',
+                                            ),
+                                          ),
+                                          TextFormField(
+                                            controller: _passwordController,
 
-                                Navigator.of(context).pop();
+                                            obscureText: true,
+                                            decoration: InputDecoration(
+                                              icon: Icon(Icons.lock, color: Color(0xff6DA08E)),
+                                              labelText: 'Contrasena',
+                                            ),
+                                          ),
+                                        ],
+                                      ),
+                                      buttons: [
+                                        DialogButton(
+                                          onPressed: () {
 
-                                //BLOQUE DE CODIGO PARA NOTIFICACION PARA COMPRAS EN CARRITO
-                                QuerySnapshot _myDocE = await FirebaseFirestore.instance.collection('Pedidos_Jimena_Interna').where('correocliente', isEqualTo: correoPersonal).where('folio', isEqualTo: _myDocCount.length+1).get();
-                                List<DocumentSnapshot> _myDocCountE = _myDocE.docs;
-                                //print('Weed: '+ _myDocCountE.length.toString() +1.toString());
-                                print('hey');
-                                var total = _myDocCountE.length;
-                                FirebaseFirestore.instance.collection('Notificaciones').doc("Carrito"+correoPersonal.toString()).update({
-                                  'notificacion': total.toString(),
-                                  'correo': correoPersonal,
-                                });
+                                            initState();
 
-                                SharedPreferences preferences = await SharedPreferences.getInstance();
-                                await preferences.remove('totalProducto');
+                                            inicioSesion();
+
+                                            setState(() {
+                                              comprasNotificaciones(context);
+                                              comprasNotificaciones2(context);
+                                              sesion = true;
+                                            });
+
+                                          },
+                                          child: Text(
+                                            "Entrar",
+                                            style: TextStyle(color: Colors.white, fontSize: 20),
+                                          ),
+                                          color: Color(0xff6DA08E),
+
+                                        ),
+                                        DialogButton(
+                                          onPressed: () {
+
+                                            Navigator.of(context).pushNamed('/registro');
+
+                                          },
+                                          child: Text(
+                                            "Registrarme",
+                                            style: TextStyle(color: Colors.white, fontSize: 20),
+                                          ),
+                                          color: Color(0xff6DA08E),
+                                        )
+                                      ]).show();
+                                } else {
+                                  // logged
+                                  agregarACarrito(context, foto, nombreProducto, costo, descripcion, empresa, categoriap, newid, codigo, existencia);
+                                  print("Con pestania");
+
+                                }
+
                               },
                             ),
                           ),
@@ -656,7 +931,7 @@ class menu_clienteState extends State<menu_cliente> {
 
                       //signOut();
                       //Navigator.of(context).pushNamed("/clientes_login");
-                      Navigator.of(context).pop(true);
+                      Navigator.of(context).pushNamedAndRemoveUntil('/clientes_login', (route) => false);
 
                     },
                   ),
@@ -668,12 +943,13 @@ class menu_clienteState extends State<menu_cliente> {
         return value == true;
       },
       child: Scaffold(
-
-        floatingActionButton: notificacionesCarrito(context),
+        floatingActionButton:
+        FirebaseAuth.instance.currentUser?.email == null?
+        notificacionesCarrito2(context)
+            :
+        notificacionesCarrito(context),
         body: StreamBuilder(
-          //YA QUE SE ABRA CANIRAC DEJARLA EN EL CEL PARA SCREENSHOTS, ABRIR ANCESTRAL Y REVISAR LA LISTA DE CLIENTES
-          //DESPUES SUBIRLA RAPIDO A PLAY STORE.
-            stream: reflistaproduccion.where('empresa', isEqualTo:  widget.empresa).orderBy('categoria', descending: false).orderBy('nombreProducto', descending: false).snapshots(),
+            stream: reflistaproduccion.where('id', isEqualTo:  "978").orderBy('categoria', descending: false).orderBy('nombreProducto', descending: false).snapshots(),
             builder: (BuildContext context, AsyncSnapshot<QuerySnapshot> snapshot){
               if (!snapshot.hasData) {
                 return Text("Loading..");
@@ -687,82 +963,96 @@ class menu_clienteState extends State<menu_cliente> {
 
                     //LAS VARIABLES QUE DELCARO AQUI HACEN EL BAD STATE!!!!!!!
 
-                    return InkWell(
-                      onTap: () async{
+                    return
+                      documents["existencia"] <= 0?
+                      Container()
+                          :
+                      InkWell(
+                        onTap: () async{
 
-                        var foto = documents["foto"];
-                        var newid = documents["newid"];
+                          var foto = documents["foto"];
+                          var newid = documents["newid"];
 
-                        showDialog(context: context, builder: (BuildContext context) =>  _buildAboutDialog(context,  documents["foto"],  documents["nombreProducto"],  documents["costoProducto"],  documents["descripcion"],  "",  "",  documents["newid"],  ""));
+                          showDialog(context: context, builder: (BuildContext context) =>  _buildAboutDialog(context,  documents["foto"],  documents["nombreProducto"],  documents["costoProducto"],  documents["descripcion"],  "",  "",  documents["newid"],"", documents["existencia"]));
 
-                        FirebaseFirestore.instance.collection('Pedidos_Jimena').doc(newid).update({
-                          'visto': 'si',
-                          'estado': 'Recibido',
-                        });
+                          FirebaseFirestore.instance.collection('Pedidos_Jimena').doc(newid).update({
+                            'visto': 'si',
+                            'estado': 'Recibido',
+                          });
 
-                      },
-                      child: Card(
-                        child: Row(
-                          children:[
-                            Row(
-                                children:[
-                                  Container(
-                                    width: 200.0,
-                                    height: 150.0,
-                                    decoration: BoxDecoration(
-                                      image: DecorationImage(
-                                        fit: BoxFit.cover,
-                                        image: NetworkImage(documents["foto"]),
+                        },
+                        child: Card(
+                          child: Row(
+                            children:[
+                              Row(
+                                  children:[
+                                    Container(
+                                      width: 200.0,
+                                      height: 150.0,
+                                      decoration: BoxDecoration(
+                                        image: DecorationImage(
+                                          fit: BoxFit.cover,
+                                          image: NetworkImage(documents["foto"]),
+                                        ),
+                                        //borderRadius: BorderRadius.all(Radius.circular(30.0)),
+                                        color: Colors.transparent,
                                       ),
-                                      //borderRadius: BorderRadius.all(Radius.circular(30.0)),
-                                      color: Colors.transparent,
                                     ),
-                                  ),
-                                  Padding(
-                                    padding: EdgeInsets.only(left:20),
-                                    child: Column(
-                                      mainAxisAlignment: MainAxisAlignment.start,
-                                      children: [
-                                        Row(
-                                          mainAxisAlignment: MainAxisAlignment.start,
-                                          children: [
-                                            Container(
-                                              child: Text(documents["nombreProducto"], style: TextStyle(fontWeight: FontWeight.bold, fontSize: 20.0, color: Colors.black45),),
-                                              //height: 30,
-                                              width: 100,
-                                            ),
-                                          ],
-                                        ),
-                                        Row(
-                                          mainAxisAlignment: MainAxisAlignment.start,
-                                          children: [
-                                            Container(
-                                              child: Text(documents["descripcion"], style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16.0, color: Colors.black26),),
-                                              //height: 30,
-                                              width: 100,
-                                            ),
-                                          ],
-                                        ),
-                                        Row(
-                                          mainAxisAlignment: MainAxisAlignment.end,
-                                          children: <Widget>[
-                                            Container(
-                                              child: Text("\$"+documents["costoProducto"].toString(), style: TextStyle(color: Colors.red[800], fontSize: 25),),
-                                              //height: 30,
-                                              width: 100,
-                                            ),
-                                          ],
-                                        ),
-                                      ],
+                                    Padding(
+                                      padding: EdgeInsets.only(left:20),
+                                      child: Column(
+                                        mainAxisAlignment: MainAxisAlignment.start,
+                                        children: [
+                                          Row(
+                                            mainAxisAlignment: MainAxisAlignment.start,
+                                            children: [
+                                              Container(
+                                                child: Text(documents["nombreProducto"], style: TextStyle(fontWeight: FontWeight.bold, fontSize: 20.0, color: Colors.black45),),
+                                                //height: 30,
+                                                width: 100,
+                                              ),
+                                            ],
+                                          ),
+                                          Row(
+                                            mainAxisAlignment: MainAxisAlignment.start,
+                                            children: [
+                                              Container(
+                                                child: Text(documents["descripcion"], style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16.0, color: Colors.black26),),
+                                                //height: 30,
+                                                width: 100,
+                                              ),
+                                            ],
+                                          ),
+                                          Row(
+                                            mainAxisAlignment: MainAxisAlignment.start,
+                                            children: [
+                                              Container(
+                                                child: Text("Existencia "+documents["existencia"].toString(), style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16.0, color: Colors.black26),),
+                                                //height: 30,
+                                                width: 100,
+                                              ),
+                                            ],
+                                          ),
+                                          Row(
+                                            mainAxisAlignment: MainAxisAlignment.end,
+                                            children: <Widget>[
+                                              Container(
+                                                child: Text("\$"+documents["costoProducto"].toString(), style: TextStyle(color: Color(0xff6DA08E), fontSize: 25),),
+                                                //height: 30,
+                                                width: 100,
+                                              ),
+                                            ],
+                                          ),
+                                        ],
+                                      ),
                                     ),
-                                  ),
 
-                                ]
-                            )
-                          ],
+                                  ]
+                              )
+                            ],
+                          ),
                         ),
-                      ),
-                    );
+                      );
                   }).toList(),
                 );
               }
