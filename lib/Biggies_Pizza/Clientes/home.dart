@@ -182,6 +182,12 @@ class homeState extends State<home> with SingleTickerProviderStateMixin {
             ),
             //Tab(icon: Icon(Icons.chat), text: "CHAT",),
             promosNotificaciones(context),
+            Column(
+              children: [
+                Tab(icon: Icon(Icons.restaurant, color: Colors.white,)),
+                Text("MENU", style: TextStyle(color: Colors.white),),
+              ],
+            ),
             //comprasNotificaciones(context),
           ],
         ),
