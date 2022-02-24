@@ -577,28 +577,8 @@ class inicioState extends State<inicio> {
                         ),
                         InkWell(
                           onTap: () async {
+                            Navigator.of(context).pushNamed("/menu_cliente");
 
-                            bool sesion = false;
-
-                            final FirebaseAuth auth = FirebaseAuth.instance;
-                            if(FirebaseAuth.instance.currentUser?.email == null){
-                              // not logged
-                              setState(() {
-                                sinSesion2();
-
-                                sesion = false;
-                                print("Sin  luca $sesion");
-                              });
-
-                            } else {
-                              // logged
-                              setState(() {
-                                Navigator.of(context).pushNamed("/menu_cliente");
-
-                                sesion = true;
-                                print("Con pestania $sesion");
-                              });
-                            }
 
                             //sinSesion2();
                             //Navigator.of(context).pushNamed("/cryptactoe");
