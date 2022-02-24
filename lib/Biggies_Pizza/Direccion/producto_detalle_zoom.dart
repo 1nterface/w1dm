@@ -1,6 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
-import 'package:siento11/Modelo/cajas_modelo.dart';
+import 'package:w1dm/Biggies_Pizza/Modelo/cajas_modelo.dart';
 import 'package:toast/toast.dart';
 
 class producto_detalle_zoom extends StatefulWidget {
