@@ -635,17 +635,6 @@ class homeState extends State<home> {
                   ],
                 ),
               ),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Column(
-                    mainAxisAlignment: MainAxisAlignment.end,
-                    children: [
-                      Text('Launch on Feb 13', style: TextStyle(color: Colors.white, fontSize: 35, fontWeight: FontWeight.bold),),
-                    ],
-                  ),
-                ],
-              ),
             ],
           ),
         )
