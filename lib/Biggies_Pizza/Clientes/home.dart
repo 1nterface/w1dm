@@ -211,4 +211,3 @@ class homeState extends State<home> with SingleTickerProviderStateMixin {
     );
   }
 }
-
