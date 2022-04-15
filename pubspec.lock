@@ -576,15 +576,6 @@ packages:
       url: "https://pub.flutter-io.cn"
     source: hosted
     version: "4.0.2"
-  pimp_my_button:
-    dependency: "direct main"
-    description:
-      path: "."
-      ref: HEAD
-      resolved-ref: a52eea867755532fb6ff862bc9946472934afbe2
-      url: "git://github.com/Norbert515/pimp_my_button.git"
-    source: git
-    version: "1.0.0"
   platform:
     dependency: transitive
     description:

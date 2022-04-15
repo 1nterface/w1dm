@@ -951,7 +951,7 @@ class menu_clienteState extends State<menu_cliente> {
         body: StreamBuilder(
             stream: reflistaproduccion.where('id', isEqualTo:  "978").orderBy('categoria', descending: false).orderBy('nombreProducto', descending: false).snapshots(),
             builder: (BuildContext context, AsyncSnapshot<QuerySnapshot> snapshot){
-              if (!snapshot.hasData) {
+              if (!snapshot.hasData) {//
                 return Text("Loading..");
               }
               //reference.where("title", isEqualTo: 'UID').snapshots(),

@@ -20,9 +20,7 @@ version: 1.0.0+1
 environment:
   sdk: ">=2.12.0 <3.0.0"
 dependencies:
-  pimp_my_button:
-    git:
-      url: git://github.com/Norbert515/pimp_my_button.git
+
   flutter:
     sdk: flutter
   popup_menu: 1.0.5
